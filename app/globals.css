@@ -1,0 +1,160 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@source "../components";
+@source "../lib";
+
+
+
+@theme {
+  --color-obsidian-bg: #07090E;
+  --color-obsidian-card: #0F131D;
+  --color-obsidian-elevated: #151B28;
+  --color-obsidian-border: rgba(255, 255, 255, 0.08);
+
+  --color-edc-cyan: #00E5FF;
+  --color-edc-cyan-hover: #33ECFF;
+  --color-edc-purple: #A855F7;
+  --color-edc-emerald: #10B981;
+  --color-edc-amber: #F59E0B;
+  --color-edc-rose: #F43F5E;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Explicit Root & Universal Resets for Mobile Chrome / Android / iOS */
+:root {
+  color-scheme: dark;
+  --bg-dark: #07090E;
+  --text-light: #f1f5f9;
+}
+
+html {
+  background-color: #07090E !important;
+  color: #f1f5f9 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+  text-rendering: optimizeSpeed;
+}
+
+body {
+  background-color: #07090E !important;
+  color: #f1f5f9 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure mobile buttons, links, and touch targets respond with zero delay */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Custom Utilities for EDC Theme & Mobile Responsiveness - GPU Optimized */
+@utility glow-cyan {
+  box-shadow: 0 0 16px -4px rgba(0, 229, 255, 0.25);
+}
+
+@utility glow-cyan-lg {
+  box-shadow: 0 0 30px -6px rgba(0, 229, 255, 0.35);
+}
+
+@utility glow-purple {
+  box-shadow: 0 0 16px -4px rgba(168, 85, 247, 0.25);
+}
+
+@utility glow-emerald {
+  box-shadow: 0 0 16px -4px rgba(16, 185, 129, 0.25);
+}
+
+@utility glass-card {
+  background: rgba(15, 19, 29, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  contain: layout style;
+}
+
+@utility glass-nav {
+  background: rgba(7, 9, 14, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  will-change: transform;
+}
+
+@utility glass-drawer {
+  background: rgba(15, 19, 29, 0.98);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@utility mobile-drawer-bottom {
+  border-top-left-radius: 1.25rem;
+  border-top-right-radius: 1.25rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+}
+
+@utility bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+@utility bg-dot-pattern {
+  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+/* Custom Smooth Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07090E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00E5FF;
+}
+
+/* Mobile Scroll Locks */
+body.mobile-menu-open {
+  overflow: hidden;
+}

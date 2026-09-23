@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "Organization": {
+      "title": "Organization",
+      "description": "The primary tenant boundary for all projects and resources.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique organization ID." },
+        "name": { "type": "string", "description": "Display name of the organization." },
+        "slug": { "type": "string", "description": "URL-safe identifier for the organization." },
+        "ownerId": { "type": "string", "description": "UID of the user who created the organization." },
+        "status": { "type": "string", "enum": ["active", "suspended", "archived"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "slug", "ownerId", "status", "createdAt", "updatedAt"]
+    },
+    "OrganizationMember": {
+      "title": "Organization Member",
+      "description": "Represents a user's membership and role within an organization.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Membership ID (usually same as userId)." },
+        "organizationId": { "type": "string" },
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["owner", "admin", "member"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "invited", "revoked"] }
+      },
+      "required": ["id", "organizationId", "userId", "role", "createdAt", "status"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A container for landing pages, domains, and settings.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "published", "archived"] },
+        "currentDraftId": { "type": "string" },
+        "publishedVersionId": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "organizationId", "name", "slug", "status", "createdBy", "createdAt", "updatedAt"]
+    },
+    "Draft": {
+      "title": "Draft",
+      "description": "The mutable state of a project landing page.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "projectId": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "content": { "type": "object", "description": "The raw landing page data." },
+        "settings": { "type": "object" },
+        "theme": { "type": "object" },
+        "seo": { "type": "object" },
+        "revision": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "projectId", "organizationId", "content", "revision", "updatedAt"]
+    },
+    "ProjectVersion": {
+      "title": "Project Version",
+      "description": "An immutable snapshot of a project at a point in time.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "projectId": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "versionNumber": { "type": "number" },
+        "snapshot": { "type": "object" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["created", "published", "superseded", "archived"] }
+      },
+      "required": ["id", "projectId", "organizationId", "versionNumber", "snapshot", "createdBy", "createdAt", "status"]
+    },
+    "DomainConnection": {
+      "title": "Domain Connection",
+      "description": "A custom domain associated with a project.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "hostname": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "verifying", "verified", "ssl_pending", "active", "error", "disabled"] },
+        "isPrimary": { "type": "boolean" },
+        "verificationToken": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "organizationId", "projectId", "hostname", "status", "isPrimary", "createdAt", "updatedAt"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "A record of important system events.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "organizationId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "actorId": { "type": "string" },
+        "action": { "type": "string" },
+        "metadata": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "organizationId", "actorId", "action", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Private user profile and metadata.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "primaryOrganizationId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "primaryOrganizationId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles."
+    },
+    "/organizations/{orgId}": {
+      "schema": "Organization",
+      "description": "Organization root document."
+    },
+    "/organizations/{orgId}/members/{memberId}": {
+      "schema": "OrganizationMember",
+      "description": "Members of the organization."
+    },
+    "/organizations/{orgId}/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Projects belonging to the organization."
+    },
+    "/organizations/{orgId}/projects/{projectId}/drafts/current": {
+      "schema": "Draft",
+      "description": "The current mutable draft of the project."
+    },
+    "/organizations/{orgId}/projects/{projectId}/versions/{versionId}": {
+      "schema": "ProjectVersion",
+      "description": "Immutable snapshots of the project."
+    },
+    "/organizations/{orgId}/projects/{projectId}/domains/{domainId}": {
+      "schema": "DomainConnection",
+      "description": "Custom domains for the project."
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "System-wide audit logs."
+    }
+  }
+}

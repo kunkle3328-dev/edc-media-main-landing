@@ -1,0 +1,8 @@
+{
+  "name": "Remix EDC Media Landing Engine",
+  "description": "AI-powered conversion-focused landing page creation system and digital revenue platform for EDC Media.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
