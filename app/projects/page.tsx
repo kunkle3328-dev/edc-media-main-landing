@@ -31,15 +31,22 @@ export default function ProjectsDirectoryPage() {
   const storageVersion = useStorageChangeVersion();
 
   const [activeWorkspace] = useState(() => WorkspaceService.getActiveWorkspace());
-  const [projects, setProjects] = useState<UniversalProject[]>(() => ProjectService.getProjects());
+  const [projects, setProjects] = useState<UniversalProject[]>([]);
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState<ProjectType | 'ALL'>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<ProjectLifecycleStatus | 'ALL'>('ALL');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isMounted) {
-      setProjects(ProjectService.getProjects(activeWorkspace.id));
+    async function load() {
+      if (isMounted) {
+        setIsLoading(true);
+        const projs = await ProjectService.getProjects(activeWorkspace.id);
+        setProjects(projs);
+        setIsLoading(false);
+      }
     }
+    load();
   }, [isMounted, storageVersion, activeWorkspace.id]);
 
   const filtered = React.useMemo(() => {
@@ -51,21 +58,26 @@ export default function ProjectsDirectoryPage() {
     });
   }, [projects, search, selectedType, selectedStatus]);
 
-  const handleDuplicate = (id: string) => {
-    const dup = ProjectService.duplicateProject(id);
-    if (dup) setProjects(ProjectService.getProjects(activeWorkspace.id));
+  const handleDuplicate = async (id: string) => {
+    const dup = await ProjectService.duplicateProject(activeWorkspace.id, id);
+    if (dup) {
+      const projs = await ProjectService.getProjects(activeWorkspace.id);
+      setProjects(projs);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Delete this project? This cannot be undone.')) {
-      ProjectService.deleteProject(id);
-      setProjects(ProjectService.getProjects(activeWorkspace.id));
+      await ProjectService.deleteProject(activeWorkspace.id, id);
+      const projs = await ProjectService.getProjects(activeWorkspace.id);
+      setProjects(projs);
     }
   };
 
   const handlePublish = async (id: string) => {
     await PublishService.publishProject(id);
-    setProjects(ProjectService.getProjects(activeWorkspace.id));
+    const projs = await ProjectService.getProjects(activeWorkspace.id);
+    setProjects(projs);
   };
 
   return (

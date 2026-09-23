@@ -73,13 +73,11 @@ service cloud.firestore {
     }
 
     function isValidProject(data) {
-      return data.keys().hasAll(['id', 'organizationId', 'name', 'slug', 'status', 'createdBy', 'createdAt', 'updatedAt'])
+      return data.keys().hasAll(['id', 'organizationId', 'name', 'slug', 'status', 'updatedAt'])
         && data.id is string && isValidId(data.id)
         && data.organizationId is string && isValidId(data.organizationId)
         && data.name is string && data.name.size() > 0
-        && data.status in ['draft', 'published', 'archived']
-        && data.createdBy == request.auth.uid
-        && data.createdAt == request.time;
+        && data.status in ['DRAFT', 'LIVE', 'BUILDING', 'PUBLISHED', 'archived', 'draft', 'published'];
     }
 
     function isValidUser(data) {

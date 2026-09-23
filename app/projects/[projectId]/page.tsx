@@ -34,11 +34,14 @@ import { resolveProjectUrl, EDC_BRAND } from '@/lib/brand-config';
 import { useMounted, useStorageChangeVersion } from '@/lib/useMounted';
 
 
+import { useAuth } from '@/components/AuthProvider';
+
 export default function ProjectDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const isMounted = useMounted();
   const storageVersion = useStorageChangeVersion();
+  const { organization } = useAuth();
 
   const projectId = params?.projectId as string;
   const [project, setProject] = useState<UniversalProject | null>(null);
@@ -50,18 +53,22 @@ export default function ProjectDetailsPage() {
   const [slugInput, setSlugInput] = useState('');
 
   useEffect(() => {
-    if (isMounted && projectId) {
-      const p = ProjectService.getProjectById(projectId);
-      setProject(p);
-      if (p) {
-        setNameInput(p.name);
-        setDescInput(p.description);
-        setSlugInput(p.slug);
-        setVersions(VersionService.getVersions(p.id));
-        setDomains(DomainService.getDomains(p.workspaceId).filter((d) => d.projectId === p.id));
+    async function load() {
+      if (isMounted && projectId) {
+        const orgId = organization?.id || 'org_edc_default';
+        const p = await ProjectService.getProjectById(orgId, projectId);
+        setProject(p);
+        if (p) {
+          setNameInput(p.name);
+          setDescInput(p.description);
+          setSlugInput(p.slug);
+          setVersions(VersionService.getVersions(p.id));
+          setDomains(DomainService.getDomains(p.workspaceId).filter((d) => d.projectId === p.id));
+        }
       }
     }
-  }, [isMounted, projectId, storageVersion]);
+    load();
+  }, [isMounted, projectId, storageVersion, organization?.id]);
 
   if (!project) {
     return (
@@ -83,13 +90,16 @@ export default function ProjectDetailsPage() {
   const resolved = resolveProjectUrl(project);
   const isLive = project.status === 'LIVE' || project.status === 'PUBLISHED';
 
-  const handleSaveDetails = (e: React.FormEvent) => {
+  const handleSaveDetails = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updated = ProjectService.updateProject(project.id, {
+    const orgId = organization?.id || 'org_edc_default';
+    await ProjectService.updateProject(orgId, project.id, {
       name: nameInput.trim(),
       description: descInput.trim(),
       slug: slugInput.trim(),
     });
+    
+    const updated = await ProjectService.getProjectById(orgId, project.id);
     if (updated) {
       setProject(updated);
       setIsEditing(false);
@@ -97,9 +107,11 @@ export default function ProjectDetailsPage() {
   };
 
   const handlePublish = async () => {
-    const res = await PublishService.publishProject(project.id, slugInput.trim() || undefined);
+    const orgId = organization?.id || 'org_edc_default';
+    const res = await PublishService.publishProject(project.id, slugInput.trim() || undefined, orgId);
     if (res.success) {
-      setProject(ProjectService.getProjectById(project.id));
+      const updated = await ProjectService.getProjectById(orgId, project.id);
+      setProject(updated);
     }
   };
 

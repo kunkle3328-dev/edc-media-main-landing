@@ -13,6 +13,7 @@ const STORAGE_KEY_ACTIVE_WS = 'edc_platform_active_workspace_id';
 
 export const DEFAULT_WORKSPACE: Workspace = {
   id: 'ws_edc_default',
+  organizationId: 'org_edc_default',
   ownerId: 'user_edc_founder',
   name: 'EDC Media Flagship',
   slug: 'edc-media-flagship',
@@ -128,6 +129,7 @@ export class WorkspaceService {
 
     const newWs: Workspace = {
       id: 'ws_' + Math.random().toString(36).substring(2, 9),
+      organizationId: 'org_edc_default',
       ownerId: data.ownerId || 'user_edc_founder',
       name: cleanName,
       slug,

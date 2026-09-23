@@ -66,7 +66,7 @@ export default function DashboardPage() {
       setIsLoading(true);
       try {
         if (organization) {
-          const projs = await ProjectService.getProjectsAsync(organization.id);
+          const projs = await ProjectService.getProjects(organization.id);
           setProjects(projs);
           if (projs.length > 0 && !targetProjectId) {
             setTargetProjectId(projs[0].id);
@@ -76,10 +76,10 @@ export default function DashboardPage() {
         } else {
           const currentWs = WorkspaceService.getActiveWorkspace();
           setActiveWorkspace(currentWs);
-          const projs = ProjectService.getProjects(currentWs.id);
-          setProjects(projs);
-          if (projs.length > 0 && !targetProjectId) {
-            setTargetProjectId(projs[0].id);
+          const resolvedProjects = await ProjectService.getProjects(currentWs.id);
+          setProjects(resolvedProjects);
+          if (resolvedProjects.length > 0 && !targetProjectId) {
+            setTargetProjectId(resolvedProjects[0].id);
           }
           const doms = DomainService.getDomains(currentWs.id);
           setDomains(doms);
@@ -113,9 +113,10 @@ export default function DashboardPage() {
     if (organization) {
       alert('Duplication not yet implemented for production projects');
     } else {
-      const dup = ProjectService.duplicateProject(projectId);
+      const dup = await ProjectService.duplicateProject(activeWorkspace.organizationId || 'org_edc_default', projectId);
       if (dup) {
-        setProjects(ProjectService.getProjects(activeWorkspace.id));
+        const projs = await ProjectService.getProjects(activeWorkspace.id);
+        setProjects(projs);
       }
     }
   };
@@ -125,8 +126,9 @@ export default function DashboardPage() {
       if (organization) {
         alert('Delete not yet implemented for production projects');
       } else {
-        ProjectService.deleteProject(projectId);
-        setProjects(ProjectService.getProjects(activeWorkspace.id));
+        await ProjectService.deleteProject(activeWorkspace.id, projectId);
+        const projs = await ProjectService.getProjects(activeWorkspace.id);
+        setProjects(projs);
       }
     }
   };
@@ -137,10 +139,11 @@ export default function DashboardPage() {
       const result = await PublishService.publishProject(projectId, undefined, organization?.id);
       if (result.success) {
         if (organization) {
-          const projs = await ProjectService.getProjectsAsync(organization.id);
+          const projs = await ProjectService.getProjects(organization.id);
           setProjects(projs);
         } else {
-          setProjects(ProjectService.getProjects(activeWorkspace.id));
+          const projs = await ProjectService.getProjects(activeWorkspace.id);
+          setProjects(projs);
         }
       } else {
         alert(result.error || 'Failed to publish project');
@@ -170,6 +173,8 @@ export default function DashboardPage() {
         const doms = await DomainService.getDomainsAsync(organization.id);
         setDomains(doms);
       } else {
+        const projs = await ProjectService.getProjects(activeWorkspace.id);
+        setProjects(projs);
         setDomains(DomainService.getDomains(activeWorkspace.id));
       }
     } else {

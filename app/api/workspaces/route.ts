@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
 
     const workspace: Workspace = {
       id: 'ws_' + Math.random().toString(36).substring(2, 9),
+      organizationId: 'org_edc_default',
       ownerId: data.ownerId || 'user_edc_founder',
       name: cleanName,
       slug,

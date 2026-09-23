@@ -14,11 +14,11 @@ export default function AutomationsBuilderPage() {
   const [triggerType, setTriggerType] = useState('LEAD_SUBMISSION');
   const [actionDesc, setActionDesc] = useState('');
 
-  const handleCreateAuto = (e: React.FormEvent) => {
+  const handleCreateAuto = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!autoName.trim()) return;
 
-    const proj = ProjectService.createProject({
+    const createdProj = await ProjectService.createProject({
       organizationId: 'org_edc_default',
       workspaceId: activeWorkspace.id,
       name: autoName.trim(),
@@ -27,7 +27,7 @@ export default function AutomationsBuilderPage() {
       metadata: { trigger: triggerType },
     });
 
-    router.push(`/projects/${proj.id}`);
+    router.push(`/projects/${createdProj.id}`);
   };
 
   return (

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { PlatformShell } from '@/components/platform/PlatformShell';
 import { WorkspaceService, DomainService, ProjectService } from '@/lib/services';
-import { DomainConnection } from '@/types/platform';
+import { DomainConnection, UniversalProject } from '@/types/platform';
 import { EDC_BRAND } from '@/lib/brand-config';
 import { useMounted, useStorageChangeVersion } from '@/lib/useMounted';
 
@@ -24,8 +24,8 @@ export default function SettingsPage() {
   const storageVersion = useStorageChangeVersion();
 
   const [activeWorkspace, setActiveWorkspace] = useState(() => WorkspaceService.getActiveWorkspace());
-  const [domains, setDomains] = useState<DomainConnection[]>(() => DomainService.getDomains());
-  const [projects] = useState(() => ProjectService.getProjects());
+  const [domains, setDomains] = useState<DomainConnection[]>([]);
+  const [projects, setProjects] = useState<UniversalProject[]>([]);
 
   const [wsName, setWsName] = useState('');
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -36,15 +36,24 @@ export default function SettingsPage() {
   const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => {
-    if (isMounted) {
-      const ws = WorkspaceService.getActiveWorkspace();
-      setActiveWorkspace(ws);
-      setWsName(ws.name);
-      setDomains(DomainService.getDomains(ws.id));
-      if (projects.length > 0 && !targetProj) {
-        setTargetProj(projects[0].id);
+    async function load() {
+      if (isMounted) {
+        const ws = WorkspaceService.getActiveWorkspace();
+        setActiveWorkspace(ws);
+        setWsName(ws.name);
+        
+        const doms = await DomainService.getDomainsAsync(ws.id);
+        setDomains(doms);
+
+        const projs = await ProjectService.getProjects(ws.id);
+        setProjects(projs);
+        
+        if (projs.length > 0 && !targetProj) {
+          setTargetProj(projs[0].id);
+        }
       }
     }
+    load();
   }, [isMounted, storageVersion]);
 
   const handleUpdateWorkspace = (e: React.FormEvent) => {

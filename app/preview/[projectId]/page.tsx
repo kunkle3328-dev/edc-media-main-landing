@@ -9,8 +9,11 @@ import { pageStorage } from '@/lib/storage';
 import { Eye, AlertTriangle, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
+import { useAuth } from '@/components/AuthProvider';
+
 export default function PreviewProjectPage() {
   const params = useParams();
+  const { organization } = useAuth();
   const projectId = params?.projectId as string;
   const [isMounted, setIsMounted] = useState(false);
   const [project, setProject] = useState<any>(null);
@@ -21,88 +24,92 @@ export default function PreviewProjectPage() {
     setIsMounted(true);
     if (!projectId) return;
 
-    // Load from universal project service
-    const proj = ProjectService.getProjectById(projectId);
-    setProject(proj);
+    async function load() {
+      // Load from universal project service
+      const orgId = organization?.id || 'org_edc_default';
+      const proj = await ProjectService.getProjectById(orgId, projectId);
+      setProject(proj);
 
-    if (proj) {
-      // Find tenant
-      const t = TenantPlatformStore.getTenantById(proj.workspaceId || 'tenant_edc_default') ||
-                TenantPlatformStore.getTenants()[0];
-      setTenant(t);
+      if (proj) {
+        // Find tenant
+        const t = TenantPlatformStore.getTenantById(proj.workspaceId || 'tenant_edc_default') ||
+                  TenantPlatformStore.getTenants()[0];
+        setTenant(t);
 
-      // Load draft landing page content
-      const lp = pageStorage.getPage(projectId) || proj.landingPageData;
-      if (lp) {
-        setPageData(lp);
-      } else {
-        // Fallback default structure
-        const defaultPage = {
-          id: projectId,
-          name: proj.name,
-          slug: proj.slug,
-          status: 'draft',
-          businessProfile: {
-            name: t?.businessName || proj.name,
-            offer: proj.description,
-            targetAudience: 'Local customers and high-intent buyers',
-            primaryGoal: 'leads',
-          },
-          strategy: {
-            businessName: t?.businessName || proj.name,
-            businessType: 'Local Business / Service',
-            offer: proj.description,
-            targetAudience: 'In-market buyers',
-            customerProblem: 'Urgent need for reliable local services',
-            desiredOutcome: 'Fast professional resolution',
-            primaryGoal: 'Book Consultation / Service',
-            primaryCTA: { label: 'Get Free Quote', actionType: 'form' },
-            secondaryCTA: { label: 'Call Us Now', actionType: 'call' },
-            valueProposition: 'Guaranteed quality service delivered on schedule.',
-            positioning: 'Industry leader',
-            urgency: 'Limited availability this week',
-            trustRequirements: ['Licensed & Insured', '5-Star Rated'],
-            objectionHandling: [],
-            recommendedSections: ['hero', 'services', 'social_proof', 'lead_capture'],
-            recommendedTone: 'Professional & Authoritative',
-            recommendedVisualDirection: 'High-contrast conversion layout',
-            recommendedSEOKeywords: [proj.name.toLowerCase()],
-            conversionRisks: [],
-            missingInformation: [],
-          },
-          theme: {
-            mode: 'obsidian',
-            primaryAccent: t?.brandColor || '#00E5FF',
-          },
-          sections: [],
-          seo: {
-            title: `${proj.name} | Preview`,
-            metaDescription: proj.description,
-            keywords: [],
-          },
-          ctaConfig: {
-            primaryText: 'Get Started',
-            actionType: 'form',
-          },
-          leadCaptureConfig: {
-            title: 'Request Your Free Quote',
-            subtitle: 'Complete the form below for immediate response.',
-            submitButtonText: 'Submit Inquiry',
-            successHeadline: 'Request Received!',
-            successMessage: 'We will be in touch shortly.',
-            fields: [
-              { name: 'name', label: 'Full Name', type: 'text', required: true },
-              { name: 'email', label: 'Email Address', type: 'email', required: true },
-              { name: 'phone', label: 'Phone Number', type: 'tel', required: true },
-            ],
-          },
-          createdAt: proj.createdAt,
-          updatedAt: proj.updatedAt,
-        };
-        setPageData(defaultPage);
+        // Load draft landing page content
+        const lp = pageStorage.getPage(projectId) || proj.landingPageData;
+        if (lp) {
+          setPageData(lp);
+        } else {
+          // Fallback default structure
+          const defaultPage = {
+            id: projectId,
+            name: proj.name,
+            slug: proj.slug,
+            status: 'draft',
+            businessProfile: {
+              name: t?.businessName || proj.name,
+              offer: proj.description,
+              targetAudience: 'Local customers and high-intent buyers',
+              primaryGoal: 'leads',
+            },
+            strategy: {
+              businessName: t?.businessName || proj.name,
+              businessType: 'Local Business / Service',
+              offer: proj.description,
+              targetAudience: 'In-market buyers',
+              customerProblem: 'Urgent need for reliable local services',
+              desiredOutcome: 'Fast professional resolution',
+              primaryGoal: 'Book Consultation / Service',
+              primaryCTA: { label: 'Get Free Quote', actionType: 'form' },
+              secondaryCTA: { label: 'Call Us Now', actionType: 'call' },
+              valueProposition: 'Guaranteed quality service delivered on schedule.',
+              positioning: 'Industry leader',
+              urgency: 'Limited availability this week',
+              trustRequirements: ['Licensed & Insured', '5-Star Rated'],
+              objectionHandling: [],
+              recommendedSections: ['hero', 'services', 'social_proof', 'lead_capture'],
+              recommendedTone: 'Professional & Authoritative',
+              recommendedVisualDirection: 'High-contrast conversion layout',
+              recommendedSEOKeywords: [proj.name.toLowerCase()],
+              conversionRisks: [],
+              missingInformation: [],
+            },
+            theme: {
+              mode: 'obsidian',
+              primaryAccent: t?.brandColor || '#00E5FF',
+            },
+            sections: [],
+            seo: {
+              title: `${proj.name} | Preview`,
+              metaDescription: proj.description,
+              keywords: [],
+            },
+            ctaConfig: {
+              primaryText: 'Get Started',
+              actionType: 'form',
+            },
+            leadCaptureConfig: {
+              title: 'Request Your Free Quote',
+              subtitle: 'Complete the form below for immediate response.',
+              submitButtonText: 'Submit Inquiry',
+              successHeadline: 'Request Received!',
+              successMessage: 'We will be in touch shortly.',
+              fields: [
+                { name: 'name', label: 'Full Name', type: 'text', required: true },
+                { name: 'email', label: 'Email Address', type: 'email', required: true },
+                { name: 'phone', label: 'Phone Number', type: 'tel', required: true },
+              ],
+            },
+            createdAt: proj.createdAt,
+            updatedAt: proj.updatedAt,
+          };
+          setPageData(defaultPage);
+        }
       }
     }
-  }, [projectId]);
+    load();
+  }, [projectId, organization?.id]);
 
   if (!isMounted) {
     return (

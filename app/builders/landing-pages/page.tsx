@@ -45,13 +45,13 @@ export default function LandingPagesBuilderPage() {
     }
   }, [isMounted, storageVersion]);
 
-  const handlePageGenerated = (newPage: LandingPage) => {
+  const handlePageGenerated = async (newPage: LandingPage) => {
     pageStorage.savePage(newPage);
     setSelectedPage(newPage);
     setSavedPages(pageStorage.getAllPages());
 
     // Also synchronize into ProjectService
-    ProjectService.createProject({
+    await ProjectService.createProject({
       organizationId: 'org_edc_default',
       workspaceId: activeWorkspace.id,
       name: newPage.name || newPage.businessProfile?.name || 'Landing Page Project',

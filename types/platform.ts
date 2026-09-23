@@ -29,6 +29,7 @@ export interface OrganizationMember {
 
 export interface Workspace {
   id: string;
+  organizationId: string;
   ownerId: string;
   name: string;
   slug: string;
@@ -89,6 +90,7 @@ export interface UniversalProject {
   publishedVersionId?: string;
   currentVersionId?: string;
   metadata?: Record<string, any>;
+  createdBy?: string;
   // Seamless adapter for existing LandingPage model
   landingPageData?: LandingPage;
 }

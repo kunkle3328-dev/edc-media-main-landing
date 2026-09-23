@@ -21,9 +21,15 @@ export class FirebaseDataService {
   /**
    * PROJECTS
    */
-  static async getProjects(organizationId: string): Promise<UniversalProject[]> {
+  static async getProjects(organizationId: string, typeFilter?: string): Promise<UniversalProject[]> {
     const projectsRef = collection(db, 'organizations', organizationId, 'projects');
-    const q = query(projectsRef, where('status', '!=', 'archived'), orderBy('status'), orderBy('updatedAt', 'desc'));
+    
+    let q = query(projectsRef, where('status', '!=', 'ARCHIVED'), orderBy('status'), orderBy('updatedAt', 'desc'));
+    
+    if (typeFilter) {
+      q = query(projectsRef, where('status', '!=', 'ARCHIVED'), where('type', '==', typeFilter), orderBy('status'), orderBy('updatedAt', 'desc'));
+    }
+
     const snapshot = await getDocs(q);
     return snapshot.docs.map(d => d.data() as UniversalProject);
   }
@@ -61,6 +67,14 @@ export class FirebaseDataService {
     const projectRef = doc(db, 'organizations', organizationId, 'projects', projectId);
     await updateDoc(projectRef, {
       ...updates,
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  static async deleteProject(organizationId: string, projectId: string): Promise<void> {
+    const projectRef = doc(db, 'organizations', organizationId, 'projects', projectId);
+    await updateDoc(projectRef, {
+      status: 'ARCHIVED',
       updatedAt: serverTimestamp()
     });
   }
@@ -115,5 +129,22 @@ export class FirebaseDataService {
     const q = query(versionsRef, orderBy('createdAt', 'desc'), limit(50));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(d => d.data() as ProjectVersion);
+  }
+
+  /**
+   * PAGE PERSISTENCE
+   */
+  static async savePage(organizationId: string, projectId: string, page: LandingPage): Promise<void> {
+    const pageRef = doc(db, 'organizations', organizationId, 'projects', projectId, 'pages', 'current');
+    await setDoc(pageRef, {
+      ...page,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  }
+
+  static async getPage(organizationId: string, projectId: string): Promise<LandingPage | null> {
+    const pageRef = doc(db, 'organizations', organizationId, 'projects', projectId, 'pages', 'current');
+    const snapshot = await getDoc(pageRef);
+    return snapshot.exists() ? snapshot.data() as LandingPage : null;
   }
 }

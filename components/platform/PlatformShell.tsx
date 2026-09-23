@@ -113,11 +113,11 @@ export function PlatformShell({
     setIsNewWorkspaceModalOpen(false);
   };
 
-  const handleCreateProject = (e: React.FormEvent) => {
+  const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProjName.trim()) return;
 
-    const created = ProjectService.createProject({
+    const created = await ProjectService.createProject({
       organizationId: 'org_edc_default',
       workspaceId: activeWorkspace.id,
       name: newProjName.trim(),

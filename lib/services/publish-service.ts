@@ -25,12 +25,8 @@ export interface PublishResult {
 
 export class PublishService {
   static async publishProject(projectId: string, customSlug?: string, organizationId?: string): Promise<PublishResult> {
-    const project = organizationId 
-      ? await ProjectService.getProjectById(projectId) // In a real app, we'd fetch from Firestore
-      : ProjectService.getProjectById(projectId);
-    
-    // For now, let's assume getProjectById is sync for local and we might need an async version
-    const p = project as any; 
+    const orgId = organizationId || 'org_edc_default';
+    const p = await ProjectService.getProjectById(orgId, projectId);
     
     if (!p) {
       return {
@@ -80,7 +76,7 @@ export class PublishService {
               version,
               publicSlug: finalSlug,
               workspaceId: p.workspaceId,
-              organizationId
+              organizationId: orgId
             }),
           });
           const data = await res.json();
@@ -115,7 +111,7 @@ export class PublishService {
     }
 
     // Update Universal Project state locally
-    const updated = ProjectService.updateProject(projectId, {
+    await ProjectService.updateProject(orgId, projectId, {
       status: 'LIVE',
       deploymentStatus: 'DEPLOYED',
       slug: finalSlug,
@@ -123,17 +119,15 @@ export class PublishService {
     });
 
     // Resolve Canonical URL
-    const resolved = resolveProjectUrl(updated || {
-      ...project,
+    const resolved = resolveProjectUrl({
+      ...p,
       status: 'LIVE',
-      publicSlug: finalSlug,
+      slug: finalSlug,
     });
     const finalUrl = resolved.url || getCustomerSubdomain(finalSlug);
 
     // Update public URL on local project state
-    if (updated) {
-      ProjectService.updateProject(projectId, { publicUrl: finalUrl });
-    }
+    await ProjectService.updateProject(orgId, projectId, { publicUrl: finalUrl });
 
     ActivityService.recordActivity({
       workspaceId: p.workspaceId,
@@ -155,11 +149,9 @@ export class PublishService {
   }
 
   static async unpublishProject(projectId: string, organizationId?: string): Promise<{ success: boolean; message: string }> {
-    const project = organizationId 
-      ? await ProjectService.getProjectById(projectId)
-      : ProjectService.getProjectById(projectId);
+    const orgId = organizationId || 'org_edc_default';
+    const p = await ProjectService.getProjectById(orgId, projectId);
       
-    const p = project as any;
     if (!p) return { success: false, message: 'Project not found' };
 
     if (p.type === 'LANDING_PAGE') {
@@ -174,7 +166,7 @@ export class PublishService {
         const res = await fetch('/api/landing-engine/unpublish', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ pageId: projectId, organizationId }),
+          body: JSON.stringify({ pageId: projectId, organizationId: orgId }),
         });
         const data = await res.json();
         if (!res.ok || !data.success) {
@@ -185,7 +177,7 @@ export class PublishService {
       }
     }
 
-    ProjectService.updateProject(projectId, {
+    await ProjectService.updateProject(orgId, projectId, {
       status: 'DRAFT',
       deploymentStatus: 'NOT_CONFIGURED',
       lastPublishedAt: undefined,
@@ -210,8 +202,9 @@ export class PublishService {
     return { success: true, message: 'Project reverted to draft state.' };
   }
 
-  static getPublishingState(projectId: string) {
-    const project = ProjectService.getProjectById(projectId);
+  static async getPublishingState(projectId: string, organizationId?: string) {
+    const orgId = organizationId || 'org_edc_default';
+    const project = await ProjectService.getProjectById(orgId, projectId);
     if (!project) return null;
 
     const resolved = resolveProjectUrl(project);

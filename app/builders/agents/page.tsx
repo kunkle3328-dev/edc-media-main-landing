@@ -14,11 +14,11 @@ export default function AgentsBuilderPage() {
   const [agentRole, setAgentRole] = useState('Inbound Lead Qualifier');
   const [agentInstructions, setAgentInstructions] = useState('');
 
-  const handleCreateAgent = (e: React.FormEvent) => {
+  const handleCreateAgent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agentName.trim()) return;
 
-    const proj = ProjectService.createProject({
+    const createdProj = await ProjectService.createProject({
       organizationId: 'org_edc_default',
       workspaceId: activeWorkspace.id,
       name: agentName.trim(),
@@ -27,7 +27,7 @@ export default function AgentsBuilderPage() {
       metadata: { role: agentRole },
     });
 
-    router.push(`/projects/${proj.id}`);
+    router.push(`/projects/${createdProj.id}`);
   };
 
   return (

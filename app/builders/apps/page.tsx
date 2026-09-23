@@ -14,11 +14,11 @@ export default function AppsBuilderPage() {
   const [modelChoice, setModelChoice] = useState('gemini-2.5-flash');
   const [appGoal, setAppGoal] = useState('');
 
-  const handleCreateApp = (e: React.FormEvent) => {
+  const handleCreateApp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!appName.trim()) return;
 
-    const proj = ProjectService.createProject({
+    const createdProj = await ProjectService.createProject({
       organizationId: 'org_edc_default',
       workspaceId: activeWorkspace.id,
       name: appName.trim(),
@@ -27,7 +27,7 @@ export default function AppsBuilderPage() {
       metadata: { model: modelChoice },
     });
 
-    router.push(`/projects/${proj.id}`);
+    router.push(`/projects/${createdProj.id}`);
   };
 
   return (

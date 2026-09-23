@@ -198,8 +198,8 @@ export function ConversionIntelligenceCommandCenter({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-5 overflow-y-auto">
-      <div className="relative w-full max-w-6xl max-h-[94vh] bg-[#0A0D14] border border-white/[0.12] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 overflow-y-auto">
+      <div className="relative w-full max-w-6xl my-auto max-h-[95vh] bg-[#0A0D14] border border-white/[0.12] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Top Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#0F121A]">
           <div className="flex items-center gap-3">

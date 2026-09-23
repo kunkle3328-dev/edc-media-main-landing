@@ -24,11 +24,11 @@ export default function WebsitesBuilderPage() {
   const [siteNiche, setSiteNiche] = useState('B2B Enterprise');
   const [siteObjective, setSiteObjective] = useState('');
 
-  const handleCreateWebsite = (e: React.FormEvent) => {
+  const handleCreateWebsite = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!siteName.trim()) return;
 
-    const proj = ProjectService.createProject({
+    const createdProj = await ProjectService.createProject({
       organizationId: 'org_edc_default',
       workspaceId: activeWorkspace.id,
       name: siteName.trim(),
@@ -37,7 +37,7 @@ export default function WebsitesBuilderPage() {
       metadata: { niche: siteNiche },
     });
 
-    router.push(`/projects/${proj.id}`);
+    router.push(`/projects/${createdProj.id}`);
   };
 
   return (
